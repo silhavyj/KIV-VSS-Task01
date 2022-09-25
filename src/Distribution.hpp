@@ -26,7 +26,7 @@ namespace kiv_vss
             
             if (lo >= hi)
             {
-                throw std::runtime_error("Lower boundary must be lower than higher boundary");
+                throw std::runtime_error("Lower boundary must be lower than upper boundary");
             }
 
             // Calculate the probabilities of the extreme values. These are
@@ -74,8 +74,17 @@ namespace kiv_vss
                 --CDF_val_it;
             }
 
-            // Return the value.
             const auto [prob, value] = *CDF_val_it;
+            const auto [prob_prev, value_prev] = *(CDF_val_it - 1);
+
+            // Interpolation between two sampled points.
+            if ((CDF_val_it - 1) >= m_sampled_CDF.begin())
+            {
+                const double ratio = (random_01 - prob_prev) / (prob - prob_prev);
+                const double interpolated_value = (ratio * value_prev) + ((1 - ratio) * value); 
+                return static_cast<T>(interpolated_value);
+            }
+
             return static_cast<T>(value);
         }
 
