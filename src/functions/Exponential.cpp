@@ -21,6 +21,16 @@ namespace kiv_vss::func
         return 100;
     }
 
+    [[nodiscard]] double Exponential_CDF::Get_Mean() const noexcept
+    {
+        return 1 / m_lambda;
+    }
+
+    [[nodiscard]] double Exponential_CDF::Get_Variance() const noexcept
+    {
+        return 1 / (m_lambda * m_lambda);
+    }
+
     [[nodiscard]] double Exponential_CDF::operator()(double x) const
     {
         return 1 - std::exp(-m_lambda / x); 

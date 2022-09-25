@@ -12,6 +12,8 @@ namespace kiv_vss::func
 
         [[nodiscard]] double Get_Min_Boundary() const noexcept override;
         [[nodiscard]] double Get_Max_Boundary() const noexcept override;
+        [[nodiscard]] double Get_Mean() const noexcept override;
+        [[nodiscard]] double Get_Variance() const noexcept override;
 
         [[nodiscard]] double operator()(double x) const override;
 

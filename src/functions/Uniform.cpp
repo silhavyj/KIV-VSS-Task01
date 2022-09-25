@@ -19,6 +19,16 @@ namespace kiv_vss::func
         return m_b;
     }
 
+    [[nodiscard]] double Uniform_CDF::Get_Mean() const noexcept
+    {
+        return m_a / 2.0 + m_b / 2.0;
+    }
+
+    [[nodiscard]] double Uniform_CDF::Get_Variance() const noexcept
+    {
+        return ((m_b - m_a) * (m_b - m_a)) / 12.0;
+    }
+
     [[nodiscard]] double Uniform_CDF::operator()(double x) const
     {
         if (x < m_a)
