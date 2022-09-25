@@ -11,7 +11,7 @@
 
 int main()
 {
-    auto cdf = std::make_shared<kiv_vss::func::Normal_CDF>(10, 4);
+    auto cdf = std::make_shared<kiv_vss::func::Exponential_CDF>(10);
     try
     {
         kiv_vss::Distribution<> dis(cdf);
@@ -23,7 +23,7 @@ int main()
         double delta{};
 
         std::ofstream file("data.txt");
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i < 8000; ++i)
         {
             const auto x = dis(rd);
         
@@ -39,7 +39,7 @@ int main()
         std::cout << "E_teorie="  << cdf->Get_Mean() << '\n';
         std::cout << "D_teorie="  << cdf->Get_Variance() << '\n';
         std::cout << "E_vypocet=" << mean << '\n';
-        std::cout << "D_vypocet"  << variance << '\n';
+        std::cout << "D_vypocet=" << variance << '\n';
     }
     catch (std::runtime_error& e)
     {

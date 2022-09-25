@@ -17,8 +17,8 @@ namespace kiv_vss::func
  
     [[nodiscard]] double Exponential_CDF:: Get_Max_Boundary() const noexcept
     {
-        // TODO
-        return 100;
+        static constexpr double LOWEST_PROB = 0.05;
+        return -std::log(LOWEST_PROB / m_lambda) * (1 / m_lambda);
     }
 
     [[nodiscard]] double Exponential_CDF::Get_Mean() const noexcept
@@ -33,6 +33,6 @@ namespace kiv_vss::func
 
     [[nodiscard]] double Exponential_CDF::operator()(double x) const
     {
-        return 1 - std::exp(-m_lambda / x); 
+        return 1 - std::exp(-m_lambda * x); 
     }
 }
