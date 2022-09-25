@@ -4,6 +4,7 @@
 #include <vector>
 #include <random>
 #include <cstdint>
+#include <cassert>
 #include <algorithm>
 
 #include "functions/CDF.h"
@@ -22,6 +23,11 @@ namespace kiv_vss
             // sampled from [lo; hi].
             const double lo = cdf->Get_Min_Boundary();
             const double hi = cdf->Get_Max_Boundary();
+            
+            if (lo >= hi)
+            {
+                throw std::runtime_error("Lower boundary must be lower than higher boundary");
+            }
 
             // Calculate the probabilities of the extreme values. These are
             // used for normalization when calculating the probability of
@@ -31,12 +37,20 @@ namespace kiv_vss
 
             // Step (period) used to sample the CDF function.
             double sample_step = (hi - lo) / sample_count;
+            double previous_prob = 0.0;
 
             for (uint32_t i = 0; i < sample_count; ++i)
             {
                 // Get a sample of CDF and calculate its probability (normalized).
                 const double value = lo + (i * sample_step);
                 const double prob  = ((cdf->operator()(value)) - lo_prob) / (hi_prob - lo_prob);
+
+                // Make sure that CDF is monotonic.
+                if (previous_prob > prob)
+                {
+                    throw std::runtime_error("CDF is not monotonic");
+                }
+                previous_prob = prob;
 
                 // Store the pair into the array of samples.
                 m_sampled_CDF[i] = { prob, value };
