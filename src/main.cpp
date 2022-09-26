@@ -2,7 +2,6 @@
 #include <random>
 #include <memory>
 #include <limits>
-#include <cmath>
 #include <vector>
 
 #include "functions/cdf.h"
@@ -20,7 +19,7 @@ void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
         kiv_vss::Distribution<> dis(cdf);
         std::random_device rd{};
 
-        size_t n{};
+        double n{};
         double mean{};
         double M2{};
         double delta;

@@ -37,7 +37,7 @@ namespace kiv_vss
             for (size_t i = 0; i < histogram.m_buckets.size(); ++i)
             {
                 const size_t width = (histogram.m_buckets[i] * BUCKET_WIDTH) / highest_count;
-                out << std::setw(PADDING) << (histogram.m_min + (i * histogram.m_bucket_size)) << ':';
+                out << std::setw(PADDING) << (histogram.m_min + (static_cast<double>(i) * histogram.m_bucket_size)) << ':';
                 for (size_t j = 0; j < width; ++j)
                 {
                     out << '*';
