@@ -14,6 +14,10 @@
 
 void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
 {
+    if (nullptr == cdf)
+    {
+        return;
+    }
     try
     {
         kiv_vss::Distribution<> dis(cdf);
@@ -56,6 +60,7 @@ void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
     catch (std::runtime_error& e)
     {
         std::cerr << "ERROR: " << e.what() << '\n';
+        std::exit(3);
     }
 }
 
@@ -64,14 +69,23 @@ int main(int argc, char* argv[])
     if (argc < 4)
     {
         std::cerr << "ERROR: Invalid number of parameters\n";
-        return 1;
+        std::exit(1);
     }
 
     const size_t count = std::strtoull(argv[1], nullptr, 0);
     const double input_mean = std::strtod(argv[2], nullptr);
     const double input_variance = std::strtod(argv[3], nullptr);
 
-    auto cdf = std::make_shared<kiv_vss::func::Normal_CDF>(input_mean, input_variance);
+    std::shared_ptr<kiv_vss::func::CDF> cdf{};
+    try
+    {
+        cdf = std::make_shared<kiv_vss::func::Normal_CDF>(input_mean, input_variance);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << "ERROR: " << e.what() << '\n';
+        std::exit(2);
+    }
 
     Run(cdf, count);
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf build || false
+rm -rf build || true
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && make -C build
 if [ $? -eq 0 ]; then

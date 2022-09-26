@@ -1,5 +1,6 @@
-#define _USE_MATH_DEFINES 
+#define _USE_MATH_DEFINES
 #include <cmath>
+#include <stdexcept>
 
 #include "Normal.h"
 
@@ -10,7 +11,10 @@ namespace kiv_vss::func
           m_variance(variance),
           m_sd(std::sqrt(variance))
     {
-
+        if (m_variance <= 0)
+        {
+            throw std::runtime_error("Variance must be > 0");
+        }
     }
 
     [[nodiscard]] double Normal_CDF::Get_Min_Boundary() const noexcept

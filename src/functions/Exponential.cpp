@@ -1,4 +1,5 @@
 #include <cmath>
+#include <stdexcept>
 
 #include "Exponential.h"
 
@@ -7,7 +8,10 @@ namespace kiv_vss::func
     Exponential_CDF::Exponential_CDF(double lambda)
         : m_lambda(lambda)
     {
-
+        if (m_lambda <= 0)
+        {
+            throw std::runtime_error("Lambda must be > 0");
+        }
     }
 
     [[nodiscard]] double Exponential_CDF::Get_Min_Boundary() const noexcept

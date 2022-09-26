@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "Uniform.h"
 
 namespace kiv_vss::func
@@ -6,7 +8,10 @@ namespace kiv_vss::func
         : m_a(a),
           m_b(b)
     {
-
+        if (m_a >= m_b)
+        {
+            throw std::runtime_error("a is greater than b");
+        }
     }
 
     [[nodiscard]] double Uniform_CDF::Get_Min_Boundary() const noexcept
