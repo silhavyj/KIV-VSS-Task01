@@ -1,7 +1,6 @@
 #include <iostream>
 #include <random>
 #include <memory>
-#include <fstream>
 #include <limits>
 #include <cmath>
 #include <vector>
@@ -13,6 +12,53 @@
 
 #include "Distribution.hpp"
 #include "Histogram.hpp"
+
+void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
+{
+    try
+    {
+        kiv_vss::Distribution<> dis(cdf);
+        std::random_device rd{};
+
+        size_t n{};
+        double mean{};
+        double M2{};
+        double delta;
+        double variance;
+
+        double min = std::numeric_limits<double>::max();
+        double max = std::numeric_limits<double>::min();
+
+        kiv_vss::Histogram histogram(cdf->Get_Min_Boundary(), 
+                                     cdf->Get_Max_Boundary(), 30);
+
+        for (size_t i = 0; i < count; ++i)
+        {
+            const auto x = dis(rd);
+            histogram.Add(x);
+
+            min = std::min(min, x);
+            max = std::max(max, x);
+
+            ++n;
+            delta = x - mean;
+            mean += delta / n;
+            M2 += delta * (x - mean);
+        }
+        variance = M2 / (n - 1);
+
+        std::cout << "E_teorie=" << cdf->Get_Mean() << '\n';
+        std::cout << "D_teorie=" << cdf->Get_Variance() << '\n';
+        std::cout << "E_vypocet=" << mean << '\n';
+        std::cout << "D_vypocet=" << variance << '\n';
+
+        std::cout << "\n" << histogram << '\n';
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << "ERROR: " << e.what() << '\n';
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -27,52 +73,6 @@ int main(int argc, char* argv[])
     const double input_variance = std::strtod(argv[3], nullptr);
 
     auto cdf = std::make_shared<kiv_vss::func::Normal_CDF>(input_mean, input_variance);
-    try
-    {
-        kiv_vss::Distribution<> dis(cdf);
-        std::random_device rd{};
 
-        double mean{};
-        size_t n{};
-        double M2{};
-        double delta;
-        double min = std::numeric_limits<double>::max();
-        double max = std::numeric_limits<double>::min();
-
-        std::vector<double> data(count);
-
-        std::ofstream file("data.txt");
-        for (size_t i = 0; i < count; ++i)
-        {
-            const auto x = dis(rd);
-            data[i] = x;
-        
-            min = std::min(min, x);
-            max = std::max(max, x);
-
-            ++n;
-            delta = x - mean;
-            mean += delta / n;
-            M2 += delta * (x - mean);
-            
-            file << x << "\n";
-        }
-        double variance = M2 / (n - 1);
-
-        std::cout << "E_teorie="  << cdf->Get_Mean() << '\n';
-        std::cout << "D_teorie="  << cdf->Get_Variance() << '\n';
-        std::cout << "E_vypocet=" << mean << '\n';
-        std::cout << "D_vypocet=" << variance << '\n';
-
-        kiv_vss::Histogram histogram(min, max, 30);
-        for (const auto& value : data)
-        {
-            histogram.Add(value);
-        }
-        std::cout << "\n" << histogram << '\n';
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << "ERROR: " << e.what() << '\n';
-    }
+    Run(cdf, count);
 }
