@@ -8,11 +8,10 @@
 
 namespace kiv_vss
 {
-    template<typename T = double>
     class Histogram
     {
     public:
-        Histogram(T min, T max, uint32_t bucket_count)
+        Histogram(double min, double max, uint32_t bucket_count)
             : m_min(min),
               m_buckets(bucket_count + 1),
               m_bucket_size((max - min) / bucket_count)
@@ -22,14 +21,13 @@ namespace kiv_vss
 
         ~Histogram() = default;
 
-        void Add(T value)
+        void Add(double value)
         {
             const auto bucket_id = static_cast<size_t>((value - m_min) / m_bucket_size);
             ++m_buckets[bucket_id];
         }
 
-        template<typename E = double>
-        friend std::ostream& operator<<(std::ostream& out, Histogram<E>& histogram)
+        friend std::ostream& operator<<(std::ostream& out, Histogram& histogram)
         {
             static constexpr int BUCKET_WIDTH = 50;
             static constexpr int PADDING = 10;
@@ -56,8 +54,8 @@ namespace kiv_vss
         }
 
     private:
-        T m_min;
+        double m_min;
         std::vector<size_t> m_buckets;
-        T m_bucket_size;
+        double m_bucket_size;
     };
 }

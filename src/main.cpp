@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         std::cout << "E_vypocet=" << mean << '\n';
         std::cout << "D_vypocet=" << variance << '\n';
 
-        kiv_vss::Histogram<> histogram(min, max, 30);
+        kiv_vss::Histogram histogram(min, max, 30);
         for (const auto& value : data)
         {
             histogram.Add(value);
