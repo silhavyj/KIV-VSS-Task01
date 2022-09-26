@@ -43,6 +43,8 @@ void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
             min = std::min(min, x);
             max = std::max(max, x);
 
+            // One-pass algorithm for calculating variance
+            // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online
             ++n;
             delta = x - mean;
             mean += delta / n;

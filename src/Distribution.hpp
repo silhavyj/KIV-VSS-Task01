@@ -1,3 +1,6 @@
+// Inspiration from:
+// https://www.anycodings.com/1questions/4917543/how-to-create-a-custom-random-distribution-function
+
 #pragma once
 
 #include <memory>
