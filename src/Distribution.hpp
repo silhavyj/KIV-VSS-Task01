@@ -7,7 +7,7 @@
 #include <cassert>
 #include <algorithm>
 
-#include "functions/CDF.h"
+#include "functions/cdf.h"
 
 namespace kiv_vss
 {
@@ -15,7 +15,7 @@ namespace kiv_vss
     class Distribution
     {
     public:
-        Distribution(std::shared_ptr<func::CDF> cdf)
+        explicit Distribution(const std::shared_ptr<func::CDF>& cdf)
             : m_sampled_CDF(sample_count)
         {
             // Get the minimum and maximum values that can be generated.
@@ -63,7 +63,7 @@ namespace kiv_vss
         T operator()(Generator& generator)
         {
             // Generate a random number [0; 1] from a uniform distribution.
-            double random_01 = m_unform_dis(generator);
+            double random_01 = m_uniform_dis(generator);
 
             // Binary search its corresponding real value in the array of samples (inverse CBF).
             auto CDF_val_it = std::upper_bound(m_sampled_CDF.begin(), m_sampled_CDF.end(), random_01, CDF_Sample_Cmp);
@@ -95,7 +95,7 @@ namespace kiv_vss
         }
 
     private:
-        std::uniform_real_distribution<> m_unform_dis;
+        std::uniform_real_distribution<> m_uniform_dis;
         std::vector<std::pair<double, double>> m_sampled_CDF;
     };
 }

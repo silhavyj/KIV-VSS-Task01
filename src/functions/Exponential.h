@@ -1,14 +1,14 @@
 #pragma once
 
-#include "CDF.h"
+#include "cdf.h"
 
 namespace kiv_vss::func
 {
     class Exponential_CDF : public CDF
     {
     public:
-        Exponential_CDF(double lambda);
-        ~Exponential_CDF() = default;
+        explicit Exponential_CDF(double lambda);
+        ~Exponential_CDF() override = default;
 
         [[nodiscard]] double Get_Min_Boundary() const noexcept override;
         [[nodiscard]] double Get_Max_Boundary() const noexcept override;

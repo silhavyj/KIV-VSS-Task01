@@ -1,14 +1,14 @@
 #pragma once
 
-#include "CDF.h"
+#include "cdf.h"
 
 namespace kiv_vss::func
 {
     class Normal_CDF : public CDF
     {
     public:
-        Normal_CDF(double mean, double variance);
-        ~Normal_CDF() = default;
+        explicit Normal_CDF(double mean, double variance);
+        ~Normal_CDF() override = default;
 
         [[nodiscard]] double Get_Min_Boundary() const noexcept override;
         [[nodiscard]] double Get_Max_Boundary() const noexcept override;
