@@ -10,7 +10,7 @@
 #include "functions/Exponential.h"
 
 #include "Distribution.hpp"
-#include "Histogram.hpp"
+#include "Histogram.h"
 
 void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
 {
