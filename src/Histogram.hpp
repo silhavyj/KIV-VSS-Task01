@@ -30,14 +30,15 @@ namespace kiv_vss
         friend std::ostream& operator<<(std::ostream& out, Histogram& histogram)
         {
             static constexpr int BUCKET_WIDTH = 50;
-            static constexpr int PADDING = 10;
+            static constexpr int PRECISION = 4;
+            // static constexpr int PADDING = 1;
 
             const size_t highest_count = histogram.Get_Highest_Count();
 
             for (size_t i = 0; i < histogram.m_buckets.size(); ++i)
             {
                 const size_t width = (histogram.m_buckets[i] * BUCKET_WIDTH) / highest_count;
-                out << std::setw(PADDING) << (histogram.m_min + (static_cast<double>(i) * histogram.m_bucket_size)) << ':';
+                out << std::fixed << std::setprecision(PRECISION) << (histogram.m_min + (static_cast<double>(i) * histogram.m_bucket_size)) << ':';
                 for (size_t j = 0; j < width; ++j)
                 {
                     out << '*';
