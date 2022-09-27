@@ -18,6 +18,9 @@ namespace kiv_vss
     class Distribution
     {
     public:
+        using TSample = std::pair<double, double>;
+
+    public:
         explicit Distribution(const std::shared_ptr<func::CDF>& cdf)
             : m_sampled_CDF(sample_count)
         {
@@ -69,7 +72,9 @@ namespace kiv_vss
             double random_01 = m_uniform_dis(generator);
 
             // Binary search its corresponding real value in the array of samples (inverse CBF).
-            auto CDF_val_it = std::upper_bound(m_sampled_CDF.begin(), m_sampled_CDF.end(), random_01, CDF_Sample_Cmp);
+            auto CDF_val_it = std::upper_bound(m_sampled_CDF.begin(), m_sampled_CDF.end(), random_01, [&](double prob, TSample& sample) {
+                return prob < sample.first;
+            });
             
             // Make sure we do not exceed the boundaries.
             if (CDF_val_it == m_sampled_CDF.end())
@@ -92,13 +97,7 @@ namespace kiv_vss
         }
 
     private:
-        static bool CDF_Sample_Cmp(double prob, std::pair<double, double>& sample)
-        {
-            return prob < sample.first;
-        }
-
-    private:
         std::uniform_real_distribution<> m_uniform_dis;
-        std::vector<std::pair<double, double>> m_sampled_CDF;
+        std::vector<TSample> m_sampled_CDF;
     };
 }
