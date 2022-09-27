@@ -31,7 +31,6 @@ namespace kiv_vss
         {
             static constexpr int BUCKET_WIDTH = 50;
             static constexpr int PRECISION = 4;
-            // static constexpr int PADDING = 1;
 
             const size_t highest_count = histogram.Get_Highest_Count();
 
