@@ -1,93 +1,113 @@
 #include <iostream>
-#include <random>
-#include <memory>
-#include <limits>
+#include <fstream>
+#include <utility>
 #include <vector>
+#include <random>
 
-#include "functions/cdf.h"
-#include "functions/Normal.h"
-#include "functions/Uniform.h"
-#include "functions/Exponential.h"
-
-#include "Distribution.hpp"
 #include "Histogram.h"
 
-void Run(const std::shared_ptr<kiv_vss::func::CDF>& cdf, size_t count)
-{
-    if (nullptr == cdf)
-    {
-        return;
-    }
-    try
-    {
-        kiv_vss::Distribution<> dis(cdf);
-        std::random_device rd{};
+// total number of generated numbers
+static constexpr uint32_t N = 1000;
 
-        double n{};
-        double mean{};
-        double M2{};
-        double delta;
-        double variance;
-
-        double min = std::numeric_limits<double>::max();
-        double max = std::numeric_limits<double>::min();
-
-        kiv_vss::Histogram histogram(cdf->Get_Min_Boundary(), 
-                                     cdf->Get_Max_Boundary(), 30);
-
-        for (size_t i = 0; i < count; ++i)
-        {
-            const auto x = dis(rd);
-            histogram.Add(x);
-
-            min = std::min(min, x);
-            max = std::max(max, x);
-
-            // One-pass algorithm for calculating variance
-            // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online
-            ++n;
-            delta = x - mean;
-            mean += delta / n;
-            M2 += delta * (x - mean);
-        }
-        variance = M2 / (n - 1);
-
-        std::cout << "E_teorie=" << cdf->Get_Mean() << '\n';
-        std::cout << "D_teorie=" << cdf->Get_Variance() << '\n';
-        std::cout << "E_vypocet=" << mean << '\n';
-        std::cout << "D_vypocet=" << variance << '\n';
-
-        std::cout << "\n" << histogram << '\n';
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << "ERROR: " << e.what() << '\n';
-        std::exit(3);
-    }
-}
+using Sample_t = std::pair<uint32_t, double>;
 
 int main(int argc, char* argv[])
 {
-    if (argc < 4)
+    // Make sure that user provided a filename as the first parameter.
+    if (argc != 2)
     {
-        std::cerr << "ERROR: Invalid number of parameters\n";
-        std::exit(1);
+        std::cerr << "ERROR: Invalid number of parameters (input file expected)\n";
+        return 1;
     }
 
-    const size_t count = std::strtoull(argv[1], nullptr, 0);
-    const double input_mean = std::strtod(argv[2], nullptr);
-    const double input_variance = std::strtod(argv[3], nullptr);
-
-    std::shared_ptr<kiv_vss::func::CDF> cdf{};
-    try
+    // Try to open the file.
+    std::fstream file(argv[1], std::ios::in);
+    if (!file)
     {
-        cdf = std::make_shared<kiv_vss::func::Normal_CDF>(input_mean, input_variance);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << "ERROR: " << e.what() << '\n';
-        std::exit(2);
+        std::cerr << "ERROR: Failed to open the input file\n";
+        return 2;
     }
 
-    Run(cdf, count);
+    std::vector<Sample_t> samples; // contents of the file (number; probability)
+    uint32_t number;               // number read from the file
+    double probability;            // probability of the number
+
+    double mean_theory{};          // theoretical mean = sum(pi * xi)
+    double var_theory{};           // theoretical variance = sum(pi * xi^2) - theoretical mean
+
+    // Read the contents of the file (line by line).
+    while (file >> number && file >> probability)
+    {
+        samples.emplace_back(number, probability);
+
+        mean_theory += number * probability;
+        var_theory += number * number * probability;
+    }
+    var_theory -= (mean_theory * mean_theory);
+
+    // Sort the samples (contents of the file) by the value (NOT the probability),
+    // so we have an ascending sequence of number e.g. 1, 6, 8, 10, 15
+    std::sort(samples.begin(), samples.end(), [](const auto& x, const auto& y) {
+        return x.first < y.first;
+    });
+
+    std::vector<uint32_t> values; // array of just the numbers (passed into the histogram)
+    
+    // Add up all probabilities (calculate the CDF function).
+    for (auto it = samples.begin() + 1; it != samples.end(); ++it)
+    {
+        it->second += (it - 1)->second;
+        values.emplace_back((it - 1)->first);
+    }
+    // Do not forget to add the very last number as well.
+    values.emplace_back(samples.rbegin()->first);
+
+    // Sum of all probabilities must be 1.
+    if (samples.rbegin()->second != 1.0)
+    {
+        std::cerr << "ERROR: Sum of all probabilities must be 1\n";
+        return 3;
+    }
+
+    kiv_vss::Histogram histogram(values);            // histogram
+    std::random_device rd{};                         // random device used when generating random numbers
+    std::uniform_real_distribution<> uniform_dist{}; // uniform distribution (0, 1)
+
+    // Define some values used when calculating actual mean and variance.
+    double n{};
+    double mean{};
+    double M2{};
+    double delta;
+
+    // Generate N random numbers from the given discrete distribution.
+    for (uint32_t i = 0; i < N; ++i)
+    {
+        // Generate a random number from (0, 1).
+        const double random_01 = uniform_dist(rd);
+
+        // Binary search the number whose added up probability is closest to the generated number (0, 1).
+        auto it = std::upper_bound(samples.begin(), samples.end(), random_01, [&](double prob, Sample_t& sample) {
+            return prob < sample.second;
+        });
+        
+        // Get the number and add it to the histogram.
+        const uint32_t x = it->first;
+        histogram.Add(x);
+
+        // Keep calculating the mean and variance.
+        ++n;
+        delta = x - mean;
+        mean += delta / n;
+        M2 += delta * (x - mean);
+    }
+    double var = M2 / (n - 1);
+
+    // Compare theoretical and actual values.
+    std::cout << "E_teorie=" << mean_theory << '\n';
+    std::cout << "D_teorie=" << var_theory << '\n';
+    std::cout << "E_vypocet=" << mean << '\n';
+    std::cout << "D_vypocet=" << var << '\n';
+
+    // Print out the histogram.
+    std::cout << '\n' << histogram << '\n';
 }
