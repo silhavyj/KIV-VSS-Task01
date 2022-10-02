@@ -7,7 +7,7 @@
 #include "Histogram.h"
 
 // total number of generated numbers
-static constexpr uint32_t N = 1000;
+static constexpr uint32_t N = 100000;
 
 using Sample_t = std::pair<uint32_t, double>;
 
