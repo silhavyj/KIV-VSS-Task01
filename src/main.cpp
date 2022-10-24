@@ -63,7 +63,8 @@ int main(int argc, char* argv[])
     values.emplace_back(samples.rbegin()->first);
 
     // Sum of all probabilities must be 1.
-    if (samples.rbegin()->second != 1.0)
+    constexpr double epsilon = 0.00001;
+    if (std::abs(samples.rbegin()->second - 1.0) > epsilon)
     {
         std::cerr << "ERROR: Sum of all probabilities must be 1\n";
         return 3;
